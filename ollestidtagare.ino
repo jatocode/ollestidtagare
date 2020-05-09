@@ -1,6 +1,16 @@
+#include <Adafruit_GFX.h>
+#include "Adafruit_LEDBackpack.h"
+
+Adafruit_7segment matrix = Adafruit_7segment();
+
 void setup() { 
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT); 
+
+    matrix.begin(0x70);
+    matrix.print(0xabcd, HEX);
+    matrix.writeDisplay();
+
 }
 
 void loop() {
