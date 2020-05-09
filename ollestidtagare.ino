@@ -19,11 +19,15 @@ void loop() {
     Serial.print("Avstånd:" );
     Serial.println(distance);
 
+    if(distance < 10000) {
+        matrix.print(distance);
+        matrix.writeDisplay();
+    }
+
     delay(200);
 }
 
 long readUltrasonicDistance(int triggerPin, int echoPin) {
-    pinMode(triggerPin, OUTPUT);  // Clear the trigger
     pinMode(triggerPin, OUTPUT);  // Clear the trigger
     digitalWrite(triggerPin, LOW);
     delayMicroseconds(2);
