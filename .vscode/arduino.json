@@ -1,7 +1,8 @@
 {
     "programmer": "AVR ISP",
     "board": "esp32:esp32:d32",
-    "configuration": "PartitionScheme=default,FlashFreq=80,UploadSpeed=115200,DebugLevel=none",
-    "port": "/dev/tty.usbserial-1420",
-    "sketch": "ollestidtagare.ino"
+    "configuration": "PartitionScheme=default,FlashFreq=80,UploadSpeed=230400,DebugLevel=none",
+    "port": "/dev/tty.usbserial-1410",
+    "sketch": "ollestidtagare.ino",
+    "output": "../build"
 }

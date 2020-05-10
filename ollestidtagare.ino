@@ -1,4 +1,5 @@
 #include <Adafruit_GFX.h>
+
 #include "Adafruit_LEDBackpack.h"
 
 Adafruit_7segment matrix = Adafruit_7segment();
@@ -20,9 +21,9 @@ int varv = 0;
 unsigned long blink = 0;
 int led = LOW;
 
-void setup() { 
+void setup() {
     Serial.begin(115200);
-    pinMode(LED_BUILTIN, OUTPUT); 
+    pinMode(LED_BUILTIN, OUTPUT);
 
     matrix.begin(0x70);
 
@@ -34,15 +35,18 @@ void setup() {
     matrix.writeDisplay();
 
     start = millis();
-
 }
 
 void loop() {
     // Avståndet blir tiden * ljudhastigheten delat med två
-    int distance = readUltrasonicDistance(26, 27) * 0.340 / 2;  
+    int distance = readUltrasonicDistance(27, 27) * 0.340 / 2;
+
+    Serial.println(distance);
 
     if (startTimer(distance)) {
         timelapse = millis() - start;
+        matrix.print(distance);
+        matrix.writeDisplay();
         Serial.println(timelapse);
         Serial.println(varv);
     }
@@ -51,12 +55,10 @@ void loop() {
     if (millis() - blink > 500) {
         blink = millis();
         led = led == LOW ? HIGH : LOW;
-        Serial.print("Avstånd:" );
-        Serial.println(distance);
     }
 
     digitalWrite(LED_BUILTIN, led);
-    delay(200);
+    delay(20);
 }
 
 bool startTimer(int dist) {
@@ -71,6 +73,7 @@ bool startTimer(int dist) {
         }
     }
     return false;
+    
 }
 
 long readUltrasonicDistance(int triggerPin, int echoPin) {
