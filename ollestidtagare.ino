@@ -40,28 +40,31 @@ void setup() {
 void loop() {
     // Avståndet blir tiden * ljudhastigheten delat med två
     int distance = readUltrasonicDistance(27, 27) * 0.340 / 2;
-
-   // Serial.println(distance);
-
     if (startTimer(distance)) {
         timelapse = millis() - start;
-        matrix.print(distance);
-        matrix.writeDisplay();
-        Serial.println(timelapse);
-        Serial.println(varv);
 
-        // Ok, vi har kört ett varv. Vill skriva ut tiden lite snyggare än i ms
+        // Gör om ms till läsbar tid så vi kan visa det
         byte tid[4];
         milliSecondsToTime(timelapse, tid);
+        start = millis();
 
-        Serial.print(tid[0]);
-        Serial.print(":");
-        Serial.print(tid[1]);
-        Serial.print(":");
-        Serial.print(tid[2]);
-        Serial.print(".");
-        Serial.print(tid[3]);
+        Serial.print(distance);
+        Serial.print(" mm - ");
+        Serial.print(timelapse);
+        Serial.print(" ms, varv: ");
+        Serial.print(varv);
         Serial.println();
+
+        if (tid[1] > 0) {
+            // Minuter:Sekunder 
+            matrix.print(tid[1] * 100 + tid[2]);
+            matrix.writeDigitRaw(2, 2 + 4);
+        } else {
+            // Sekunder:Hundradelar
+            matrix.print(tid[2] * 100 + tid[3]);
+            matrix.writeDigitRaw(2, 2 + 8);
+        }
+        matrix.writeDisplay();
     }
 
     // Blinka lite så vi vet att vi lever
@@ -75,11 +78,24 @@ void loop() {
 }
 
 bool startTimer(int dist) {
+    if(dist > 10000) {
+        // Outside range, dont care
+        dist = 10000;
+    }
     int ddiff = dist - lastDistance;
+    int prevLast = lastDistance;
     lastDistance = dist;
     if (abs(ddiff) >= minDiff) {
         unsigned long tdiff = millis() - lastDistChange;
         if (tdiff >= graceTime) {
+            Serial.print("Time diff: ");
+            Serial.println(tdiff);
+            Serial.print("Distance diff:");
+            Serial.print(abs(ddiff));
+            Serial.print(", distance: ");
+            Serial.print(dist);
+            Serial.print(", previous distance: ");
+            Serial.println(prevLast);
             lastDistChange = millis();
             varv++;
             return true;
