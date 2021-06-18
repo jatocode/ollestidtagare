@@ -20,9 +20,9 @@
 #define MAX_EEPROM_LEN 50  // Max length to read ssid/passwd
 
 // Set these to your desired credentials.
-const char *ssid = "loin32wifi";
-const char *password = "supersecret";
-const char *mdnsname = "loin32";
+const char *ssid = "ollestimer";
+const char *password = "";
+const char *mdnsname = "ollestimer";
 
 String ipaddress = "";
 String savedSSID = "";
@@ -102,18 +102,21 @@ int led = LOW;
 
 void setup() {
     Serial.begin(115200);
+
+    delay(1000);
+
     pinMode(LED_BUILTIN, OUTPUT);
 
     Serial.println();
     Serial.println("Reading settings from EEPROM");
     EEPROM.begin(EEPROM_SIZE);
 
-    savedSSID = readStringEEPROM(EEPROM_SSID);
-    savedPASS = readStringEEPROM(EEPROM_PASS);
+    savedSSID = "wind up bird"; // readStringEEPROM(EEPROM_SSID);
+    savedPASS = "murakam1"; // readStringEEPROM(EEPROM_PASS);
     Serial.println(savedSSID);
     Serial.println(savedPASS);
 
-    // Try to guess if we got saved data or random unitialized
+    // Try to guess if we got saved data or random unitialized∏
     if (savedSSID.length() == MAX_EEPROM_LEN ||
         savedPASS.length() == MAX_EEPROM_LEN) {
         Serial.println("Unitialized data from EEPROM");
@@ -238,6 +241,8 @@ void loop() {
     if (startTimer(distance)) {
         timelapse = millis() - start;
 
+        pubmqttlaptime(String(timelapse));
+
         // Gör om ms till läsbar tid så vi kan visa det
         byte tid[4];
         milliSecondsToTime(timelapse, tid);
@@ -334,28 +339,12 @@ long readUltrasonicDistance(int triggerPin, int echoPin) {
     return pulseIn(echoPin, HIGH);
 }
 
-
-void pubmqttlarm(String larm) {
-    String status = "{\"aktivt\":\"" + larm + "\"}";
-    char a[100];
-    status.toCharArray(a, status.length() + 1);
-    mqttClient.publish("olle/esp32/larm", a, true);
-}
-
-void pubmqttcode(String code) {
-    String status = "{\"kod\":\"" + code + "\"}";
-    char a[100];
-    status.toCharArray(a, status.length() + 1);
-    mqttClient.publish("olle/esp32/code", a, false);
-}
-
-
-void pubmqttstatus(String key, String msg, String card) {
+void pubmqttlaptime(String msg) {
     String status =
-        "{\"" + key + "\":\"" + msg + "\",\"card\":\"" + card + "\"}";
+        "{\"laptime\":\"" + msg + "\"}";
     char a[100];
     status.toCharArray(a, status.length() + 1);
-    mqttClient.publish("olle/esp32/status", a, true);
+    mqttClient.publish("olle/olletimer/status", a, true);
 }
 
 void setupMQTT() {
@@ -375,7 +364,7 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
         messageTemp += (char)message[i];
     }
     Serial.println();
-    if (String(topic) == "olle/tidtagare") {
+    if (String(topic) == "olle/timer") {
         //
     }
 }
@@ -387,7 +376,7 @@ void reconnect() {
         clientId += String(random(0xffff), HEX);
         if (mqttClient.connect(clientId.c_str())) {
             Serial.println("mqtt connected");
-            mqttClient.publish("olle/tidtagare", "Olles tidtagare lever");
+            mqttClient.publish("olle/timer", "Olles tidtagare lever");
             // // Send door status
             // if (state == 0) {
             //     pubmqttstatus("status", "1", "locked after reset");
