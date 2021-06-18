@@ -196,46 +196,6 @@ void loop() {
         dnsServer.processNextRequest();
     }
 
-    if (!mqttClient.connected()) {
-        Serial.println("Reconnecting mqttClient");
-        reconnect();
-    }
-    mqttClient.loop();  // Loopar inte, ska bara köras i loopen
-
-    ArduinoOTA.handle();
-
-
-    WiFiClient client = server.available();
-
-    if (client) {
-        String currentLine = "";
-        while (client.connected()) {
-            if (client.available()) {
-                char c = client.read();
-                if (c == '\n') {
-                    // if the current line is blank, you got two newline
-                    // characters in a row. that's the end of the client HTTP
-                    // request, so send a response:
-                    if (currentLine.length() == 0) {
-                        if (connected) {
-                            // Connected to WiFi. Respond with main page
-                            writeMainResponse(client);
-                        } else {
-                            // Access point. Respond with wifi-select page
-                            writeAPResponse(client);
-                        }
-                        break;
-                    } else {
-                        currentLine = "";
-                    }
-                } else if (c != '\r') {
-                    currentLine += c;
-                }
-            }
-        }
-        client.stop();
-    }
-
     // Avståndet blir tiden * ljudhastigheten delat med två
     int distance = readUltrasonicDistance(27, 27) * 0.340 / 2;
     if (startTimer(distance)) {
@@ -273,6 +233,14 @@ void loop() {
         led = led == LOW ? HIGH : LOW;
     }
 
+    if (!mqttClient.connected()) {
+        Serial.println("Reconnecting mqttClient");
+        reconnect();
+    }
+    mqttClient.loop();  // Loopar inte, ska bara köras i loopen
+
+    ArduinoOTA.handle();
+    
     digitalWrite(LED_BUILTIN, led);
     delay(20);
 }
